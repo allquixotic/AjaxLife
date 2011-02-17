@@ -129,6 +129,7 @@
     <Compile Include="Html\CreateSession.cs" />
     <Compile Include="Html\iPhone.cs" />
     <Compile Include="Converters\UUIDConverter.cs" />
+    <Compile Include="WhiteList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assemblies\Affirma.ThreeSharp.dll" />

@@ -110,9 +110,23 @@ namespace AjaxLife.Html
                     textWriter.Flush();
                     return;
                 }
-                LoginParams login = client.Network.DefaultLoginParams(first, last, pass, "AjaxLife", "Katharine Berry <katharine@katharineberry.co.uk>");
-                login.Platform = "web";
-                login.Channel = "AjaxLife Release; original IP: " + request.Client.RemoteAddress;
+                
+                if (AjaxLife.WhitelistUsers.UseWhitelist() && !AjaxLife.WhitelistUsers.IsWhiteListed(first, last))
+                {
+                    textWriter.WriteLine("{success: false, message: \"You have not been whitelisted to login to this server by the administrator.\"}");
+                    textWriter.Flush();
+                    return;
+                }
+                
+                string random_viewer_name = GetRandomString();
+                string random_author = GetRandomString();
+                string random_email = GetRandomString();
+                string random_domain = GetRandomString();
+                //LoginParams login = client.Network.DefaultLoginParams(first, last, pass, "AjaxLife", "Katharine Berry <katharine@katharineberry.co.uk>");
+                LoginParams login = client.Network.DefaultLoginParams(first, last, pass, random_viewer_name, random_author + "<" +
+                                                                      random_email + "@" + random_domain + ".com>");
+                login.Platform = GetRandomPlatform();
+                login.Channel = random_viewer_name + "; original IP: " + request.Client.RemoteAddress;
                 login.MAC = AjaxLife.MAC_ADDRESS;
                 login.ID0 = AjaxLife.ID0;
                 login.Start = (POST["location"] != "arbitrary") ? POST["location"] : NetworkManager.StartLocation(POST["sim"], 128, 128, 20);
@@ -159,6 +173,40 @@ namespace AjaxLife.Html
                 textWriter.WriteLine(exception.Message);
             }
             textWriter.Flush();
+        }
+        
+        public static Random rnddnd = new Random((int)DateTime.Now.Ticks);
+        public static string GetRandomString()
+        {
+            return GetRandomString(rnddnd.Next(6, 12));
+        }
+        
+        public static string GetRandomString(int length)
+        {
+            string charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+            StringBuilder rs = new StringBuilder();
+            
+            while (length-- > 0)
+            {
+                rs.Append(charPool[(int)(rnddnd.NextDouble() * charPool.Length)]);
+            }
+            
+            return rs.ToString();
+        }
+        
+        public static string GetRandomPlatform()
+        {
+            int rnd = rnddnd.Next(0, 3);
+            if(rnd == 0)
+                return "Windows";
+            if(rnd == 1)
+                return "Mac OS X";
+            if(rnd == 2)
+                return "GNU/Linux";
+            if(rnd == 3)
+                return "Solaris";
+            
+            return GetRandomString();
         }
 
         private void RegisterCallbacks(User user)

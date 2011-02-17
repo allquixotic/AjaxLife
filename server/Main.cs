@@ -51,7 +51,9 @@ namespace AjaxLife
         public static string MAC_ADDRESS { get { return MacAddress; } }
         public static string ID0 { get { return Id0; } }
         public static string BAN_LIST { get { return BanList; } }
+        public static string WHITE_LIST { get { return WhiteList; } }
         public static double BAN_UPDATE_TIME { get { return BanUpdateTime; } }
+        public static double WHITE_UPDATE_TIME { get { return WhiteUpdateTime; } }
         public static bool USE_S3 { get { return UseS3; } }
         public static bool HANDLE_CONTENT_ENCODING { get { return HandleContentEncoding; } }
         public static bool DEBUG_MODE { get { return DebugMode; } }
@@ -73,6 +75,8 @@ namespace AjaxLife
         private static string MacAddress = "00:00:00:00:00:00";
         private static string BanList = "";
         private static double BanUpdateTime = 300.0;
+        private static string WhiteList = "";
+        private static double WhiteUpdateTime = 300.0;
         public static string Id0 = "";
         private static bool HandleContentEncoding = false;
         private static bool UseS3 = false;
@@ -101,6 +105,9 @@ namespace AjaxLife
         
         // Provides ban list functionality
         public static BanList BannedUsers;
+        
+        // Provides white list functionality.
+        public static WhiteList WhitelistUsers;
 
         // Program start. Just launches the real program.
         static void Main(string[] args)
@@ -141,6 +148,10 @@ namespace AjaxLife
             Console.WriteLine("Default grid: " + DEFAULT_LOGIN_SERVER);
             
             // More fun option setting.
+            if (args["whitelist"] != null)
+            {
+                WhiteList = args["whitelist"];
+            }
             if (args["root"] != null)
             {
                 StaticRoot = args["root"];
@@ -200,6 +211,27 @@ namespace AjaxLife
             else
             {
                 Console.WriteLine("Not using ban list.");
+            }
+            if(WhiteList != "")
+            {
+                Console.WriteLine("Using whitelist at " + WhiteList);
+                if (args["whiteupdate"] != null)
+                {
+                    WhiteUpdateTime = double.Parse(args["whiteupdate"]);   
+                }
+                
+                if(WhiteUpdateTime > 0.0)
+                {
+                    Console.WriteLine("Updating the whitelist every " + WhiteUpdateTime + " seconds.");   
+                }
+                else
+                {
+                    Console.WriteLine("Whitelist updating disabled.");   
+                }
+            }
+            else
+            {
+                Console.WriteLine("Not using whitelist.");   
             }
             HandleContentEncoding = (args["doencoding"] != null);
             Console.WriteLine("Handling content encoding: " + (HANDLE_CONTENT_ENCODING ? "Yes" : "No"));
@@ -321,6 +353,8 @@ namespace AjaxLife
             #endregion
             Console.WriteLine("Loading banlist...");
             BannedUsers = new BanList(); // Create BanList.
+            Console.WriteLine("Loading whitelist...");
+            WhitelistUsers = new WhiteList(); // Create WhiteList.
             
             Console.WriteLine("Starting server...");
             // Start the webserver.
